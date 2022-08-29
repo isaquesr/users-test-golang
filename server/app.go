@@ -30,8 +30,12 @@ func NewApp() *App {
 	userRepo := authmongo.NewUserRepository(db, viper.GetString("mongo.user_collection"))
 
 	return &App{
-		httpServer: &http.Server{},
-		authUC:     authusecase.NewAuthUseCase(userRepo, viper.GetString("auth.hash_salt"), []byte(viper.GetString("auth.signing_key")), viper.GetDuration("auth.token_ttl")),
+		authUC: authusecase.NewAuthUseCase(
+			userRepo,
+			viper.GetString("auth.hash_salt"),
+			[]byte(viper.GetString("auth.signing_key")),
+			viper.GetDuration("auth.token_ttl"),
+		),
 	}
 }
 

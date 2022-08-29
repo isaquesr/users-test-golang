@@ -9,7 +9,7 @@ import (
 const CtxUserKey = "user"
 
 type UseCase interface {
-	SignUp(ctx context.Context, username, password string) error
+	SignUp(ctx context.Context, u *domain.User) error
 	SignIn(ctx context.Context, username, password string) (string, error)
 	ParseToken(ctx context.Context, accessToken string) (*domain.User, error)
 }

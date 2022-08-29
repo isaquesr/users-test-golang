@@ -23,15 +23,19 @@ type UserRepository struct {
 	db *mongo.Collection
 }
 
+// CreateUser implements auth.UserRepository
+func (*UserRepository) CreateUser(ctx context.Context, user *domain.User) error {
+	panic("unimplemented")
+}
+
 func NewUserRepository(db *mongo.Database, collection string) *UserRepository {
 	return &UserRepository{
 		db: db.Collection(collection),
 	}
 }
 
-func (r *UserRepository) Create(ctx context.Context, user domain.User) error {
-	users := toMongoUser(user)
-	_, err := r.db.InsertOne(ctx, users)
+func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
+	_, err := r.db.InsertOne(ctx, user)
 	if IsDuplicate(err) {
 		return domain.ErrUserAlreadyExists
 	}
@@ -61,17 +65,6 @@ func toModel(u *UserDto) *domain.User {
 		Age:      u.Age,
 		Email:    u.Email,
 		Password: u.Password,
-	}
-}
-
-func toMongoUser(user domain.User) *UserDto {
-	return &UserDto{
-		ID:       user.ID,
-		Name:     user.Name,
-		Address:  user.Address,
-		Age:      user.Age,
-		Email:    user.Email,
-		Password: user.Password,
 	}
 }
 

@@ -11,8 +11,8 @@ type AuthUseCaseMock struct {
 	mock.Mock
 }
 
-func (m *AuthUseCaseMock) SignUp(ctx context.Context, username, password string) error {
-	args := m.Called(username, password)
+func (m *AuthUseCaseMock) SignUp(ctx context.Context, u *domain.User) error {
+	args := m.Called(u)
 
 	return args.Error(0)
 }
