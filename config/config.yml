@@ -1,0 +1,11 @@
+port: 8000
+
+auth:
+  hash_salt: "hash_salt"
+  signing_key: "signing_key"
+  token_ttl: 1800
+
+mongo:
+  uri: "mongodb://mongodb:27017"
+  name: "testdb"
+  user_collection: "users"
