@@ -6,7 +6,7 @@ auth:
   token_ttl: 1800
 
 mongo:
-  uri: "mongodb+srv://isr_adm:Lucca19042021@isr-consulting.hiy9a.gcp.mongodb.net/?retryWrites=true&w=majority"
+  uri: "mongodb://mongodb:27017"
   name: "testdb"
+  user_collection: "users"
   login_collection: "logins"
-  users_collection: "users"
