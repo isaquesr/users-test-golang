@@ -36,7 +36,7 @@ func TestAuthMiddleware(t *testing.T) {
 
 	// Bearer Auth Header with no token request
 	w = httptest.NewRecorder()
-	uc.On("ParseToken", "").Return(&domain.User{}, auth.ErrInvalidAccessToken)
+	uc.On("ParseToken", "").Return(&domain.Login{}, auth.ErrInvalidAccessToken)
 
 	req.Header.Set("Authorization", "Bearer ")
 	r.ServeHTTP(w, req)
@@ -44,7 +44,7 @@ func TestAuthMiddleware(t *testing.T) {
 
 	// Valid Auth Header
 	w = httptest.NewRecorder()
-	uc.On("ParseToken", "token").Return(&domain.User{}, nil)
+	uc.On("ParseToken", "token").Return(&domain.Login{}, nil)
 
 	req.Header.Set("Authorization", "Bearer token")
 	r.ServeHTTP(w, req)

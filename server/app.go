@@ -14,24 +14,33 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/isaquesr/users-test-golang/auth"
+	"github.com/isaquesr/users-test-golang/user"
 
 	authhttp "github.com/isaquesr/users-test-golang/auth/delivery/http"
 	authmongo "github.com/isaquesr/users-test-golang/auth/repository/mongo"
 	authusecase "github.com/isaquesr/users-test-golang/auth/usecase"
+	userhttp "github.com/isaquesr/users-test-golang/user/delivery/http"
+	bmmongo "github.com/isaquesr/users-test-golang/user/repository/mongo"
+	bmusecase "github.com/isaquesr/users-test-golang/user/usecase"
 )
 
 type App struct {
 	httpServer *http.Server
-	authUC     auth.UseCase
+
+	userUC user.UseCase
+	authUC auth.UseCase
 }
+
 func NewApp() *App {
 	db := initDB()
 
-	userRepo := authmongo.NewUserRepository(db, viper.GetString("mongo.user_collection"))
+	loginRepo := authmongo.NewLoginRepository(db, viper.GetString("mongo.login_collection"))
+	userRepo := bmmongo.NewUserRepository(db, viper.GetString("mongo.user_collection"))
 
 	return &App{
+		userUC: bmusecase.NewUserUseCase(userRepo),
 		authUC: authusecase.NewAuthUseCase(
-			userRepo,
+			loginRepo,
 			viper.GetString("auth.hash_salt"),
 			[]byte(viper.GetString("auth.signing_key")),
 			viper.GetDuration("auth.token_ttl"),
@@ -47,9 +56,14 @@ func (a *App) Run(port string) error {
 		gin.Logger(),
 	)
 
+	// API endpoints
+	authMiddleware := authhttp.NewAuthMiddleware(a.authUC)
+	api := router.Group("/api", authMiddleware)
+
 	// Set up http handlers
 	// SignUp/SignIn endpoints
 	authhttp.RegisterHTTPEndpoints(router, a.authUC)
+	userhttp.RegisterHTTPEndpoints(api, a.userUC)
 
 	// HTTP Server
 	a.httpServer = &http.Server{

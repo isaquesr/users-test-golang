@@ -6,65 +6,63 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/isaquesr/users-test-golang/domain"
+
 	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/isaquesr/users-test-golang/auth"
-	"github.com/isaquesr/users-test-golang/domain"
 )
 
 type AuthClaims struct {
 	jwt.StandardClaims
-	User *domain.User `json:"name"`
+	Login *domain.Login `json:"login"`
 }
 
 type AuthUseCase struct {
-	userRepo       auth.UserRepository
+	loginRepo      auth.LoginRepository
 	hashSalt       string
 	signingKey     []byte
 	expireDuration time.Duration
 }
 
 func NewAuthUseCase(
-	userRepo auth.UserRepository,
+	loginRepo auth.LoginRepository,
 	hashSalt string,
 	signingKey []byte,
 	tokenTTL time.Duration) *AuthUseCase {
 	return &AuthUseCase{
-		userRepo:       userRepo,
+		loginRepo:      loginRepo,
 		hashSalt:       hashSalt,
 		signingKey:     signingKey,
 		expireDuration: time.Second * tokenTTL,
 	}
 }
 
-func (a *AuthUseCase) SignUp(ctx context.Context, u *domain.User) error {
+func (a *AuthUseCase) SignUp(ctx context.Context, username, password string) error {
 	pwd := sha1.New()
-	pwd.Write([]byte(u.Password))
+	pwd.Write([]byte(password))
 	pwd.Write([]byte(a.hashSalt))
 
-	user := &domain.User{
-		Name:     u.Name,
+	user := &domain.Login{
+		Username: username,
 		Password: fmt.Sprintf("%x", pwd.Sum(nil)),
-		Address:  u.Address,
-		Age:      u.Age,
-		Email:    u.Email,
 	}
 
-	return a.userRepo.CreateUser(ctx, user)
+	return a.loginRepo.CreateLogin(ctx, user)
 }
 
-func (a *AuthUseCase) SignIn(ctx context.Context, name, password string) (string, error) {
+func (a *AuthUseCase) SignIn(ctx context.Context, username, password string) (string, error) {
 	pwd := sha1.New()
 	pwd.Write([]byte(password))
 	pwd.Write([]byte(a.hashSalt))
 	password = fmt.Sprintf("%x", pwd.Sum(nil))
 
-	user, err := a.userRepo.GetUser(ctx, name, password)
+	user, err := a.loginRepo.GetLogin(ctx, username, password)
 	if err != nil {
 		return "", auth.ErrUserNotFound
 	}
 
 	claims := AuthClaims{
-		User: user,
+		Login: user,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: jwt.At(time.Now().Add(a.expireDuration)),
 		},
@@ -75,7 +73,7 @@ func (a *AuthUseCase) SignIn(ctx context.Context, name, password string) (string
 	return token.SignedString(a.signingKey)
 }
 
-func (a *AuthUseCase) ParseToken(ctx context.Context, accessToken string) (*domain.User, error) {
+func (a *AuthUseCase) ParseToken(ctx context.Context, accessToken string) (*domain.Login, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &AuthClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -88,7 +86,7 @@ func (a *AuthUseCase) ParseToken(ctx context.Context, accessToken string) (*doma
 	}
 
 	if claims, ok := token.Claims.(*AuthClaims); ok && token.Valid {
-		return claims.User, nil
+		return claims.Login, nil
 	}
 
 	return nil, auth.ErrInvalidAccessToken

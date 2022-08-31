@@ -10,32 +10,25 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type UserDto struct {
-	ID       primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Name     string             `json:"name" bson:"name"`
-	Email    string             `json:"email" bson:"email"`
-	Age      int32              `json:"age" bson:"age"`
-	Password string             `json:"password" bson:"password"`
-	Address  string             `json:"address" bson:"address"`
+type Login struct {
+	ID       primitive.ObjectID `bson:"_id,omitempty"`
+	Username string             `bson:"username"`
+	Password string             `bson:"password"`
 }
 
-type UserRepository struct {
+type LoginRepository struct {
 	db *mongo.Collection
 }
 
-// CreateUser implements auth.UserRepository
-func (*UserRepository) CreateUser(ctx context.Context, user *domain.User) error {
-	panic("unimplemented")
-}
-
-func NewUserRepository(db *mongo.Database, collection string) *UserRepository {
-	return &UserRepository{
+func NewLoginRepository(db *mongo.Database, collection string) *LoginRepository {
+	return &LoginRepository{
 		db: db.Collection(collection),
 	}
 }
 
-func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
-	_, err := r.db.InsertOne(ctx, user)
+func (r LoginRepository) CreateLogin(ctx context.Context, login *domain.Login) error {
+	model := toMongoLogin(login)
+	_, err := r.db.InsertOne(ctx, model)
 	if IsDuplicate(err) {
 		return domain.ErrUserAlreadyExists
 	}
@@ -43,10 +36,10 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 	return err
 }
 
-func (r UserRepository) GetUser(ctx context.Context, email, password string) (*domain.User, error) {
-	user := new(UserDto)
+func (r LoginRepository) GetLogin(ctx context.Context, username, password string) (*domain.Login, error) {
+	user := new(Login)
 	err := r.db.FindOne(ctx, bson.M{
-		"email":    email,
+		"username": username,
 		"password": password,
 	}).Decode(user)
 
@@ -57,13 +50,17 @@ func (r UserRepository) GetUser(ctx context.Context, email, password string) (*d
 	return toModel(user), nil
 }
 
-func toModel(u *UserDto) *domain.User {
-	return &domain.User{
+func toMongoLogin(u *domain.Login) *Login {
+	return &Login{
+		Username: u.Username,
+		Password: u.Password,
+	}
+}
+
+func toModel(u *Login) *domain.Login {
+	return &domain.Login{
 		ID:       u.ID,
-		Name:     u.Name,
-		Address:  u.Address,
-		Age:      u.Age,
-		Email:    u.Email,
+		Username: u.Username,
 		Password: u.Password,
 	}
 }

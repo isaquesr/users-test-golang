@@ -9,9 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/isaquesr/users-test-golang/auth/usecase"
-	"github.com/isaquesr/users-test-golang/domain"
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestSignUp(t *testing.T) {
@@ -20,19 +18,15 @@ func TestSignUp(t *testing.T) {
 
 	RegisterHTTPEndpoints(r, uc)
 
-	user := &domain.User{
-		ID:       primitive.NewObjectID(),
-		Name:     "name",
-		Password: "password",
-		Email:    "email",
-		Age:      20,
-		Address:  "address",
+	signUpBody := &signInput{
+		Username: "testuser",
+		Password: "testpass",
 	}
 
-	body, err := json.Marshal(user)
+	body, err := json.Marshal(signUpBody)
 	assert.NoError(t, err)
 
-	uc.On("SignUp", user).Return(nil)
+	uc.On("SignUp", signUpBody.Username, signUpBody.Password).Return(nil)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/auth/sign-up", bytes.NewBuffer(body))
@@ -47,15 +41,15 @@ func TestSignIn(t *testing.T) {
 
 	RegisterHTTPEndpoints(r, uc)
 
-	signUpBody := &SignIn{
-		Name:     "testuser",
+	signUpBody := &signInput{
+		Username: "testuser",
 		Password: "testpass",
 	}
 
 	body, err := json.Marshal(signUpBody)
 	assert.NoError(t, err)
 
-	uc.On("SignIn", signUpBody.Name, signUpBody.Password).Return("jwt", nil)
+	uc.On("SignIn", signUpBody.Username, signUpBody.Password).Return("jwt", nil)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/auth/sign-in", bytes.NewBuffer(body))

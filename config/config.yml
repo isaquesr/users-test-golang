@@ -1,4 +1,4 @@
-port: 8000
+port: 8080
 
 auth:
   hash_salt: "hash_salt"
@@ -6,6 +6,7 @@ auth:
   token_ttl: 1800
 
 mongo:
-  uri: "mongodb://mongodb:27017"
+  uri: "mongodb+srv://isr_adm:Lucca19042021@isr-consulting.hiy9a.gcp.mongodb.net/?retryWrites=true&w=majority"
   name: "testdb"
-  user_collection: "users"
+  login_collection: "logins"
+  users_collection: "users"

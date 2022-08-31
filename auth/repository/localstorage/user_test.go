@@ -13,23 +13,20 @@ import (
 func TestGetUser(t *testing.T) {
 	s := NewUserLocalStorage()
 
-	user := &domain.User{
+	login := &domain.Login{
 		ID:       primitive.NewObjectID(),
-		Name:     "name",
+		Username: "user",
 		Password: "password",
-		Email:    "email",
-		Age:      20,
-		Address:  "address",
 	}
 
-	err := s.CreateUser(context.Background(), user)
+	err := s.CreateLogin(context.Background(), login)
 	assert.NoError(t, err)
 
-	returnedUser, err := s.GetUser(context.Background(), "name", "password")
+	returnedUser, err := s.GetLogin(context.Background(), "user", "password")
 	assert.NoError(t, err)
-	assert.Equal(t, user, returnedUser)
+	assert.Equal(t, login, returnedUser)
 
-	returnedUser, err = s.GetUser(context.Background(), "name", "")
+	returnedUser, err = s.GetLogin(context.Background(), "user", "")
 	assert.Error(t, err)
 	assert.Equal(t, err, auth.ErrUserNotFound)
 }
