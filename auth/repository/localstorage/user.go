@@ -9,18 +9,18 @@ import (
 )
 
 type UserLocalStorage struct {
-	users map[string]*domain.User
+	users map[string]*domain.Login
 	mutex *sync.Mutex
 }
 
 func NewUserLocalStorage() *UserLocalStorage {
 	return &UserLocalStorage{
-		users: make(map[string]*domain.User),
+		users: make(map[string]*domain.Login),
 		mutex: new(sync.Mutex),
 	}
 }
 
-func (s *UserLocalStorage) CreateUser(ctx context.Context, user *domain.User) error {
+func (s *UserLocalStorage) CreateLogin(ctx context.Context, user *domain.Login) error {
 	s.mutex.Lock()
 	s.users[user.ID.String()] = user
 	s.mutex.Unlock()
@@ -28,12 +28,12 @@ func (s *UserLocalStorage) CreateUser(ctx context.Context, user *domain.User) er
 	return nil
 }
 
-func (s *UserLocalStorage) GetUser(ctx context.Context, name, password string) (*domain.User, error) {
+func (s *UserLocalStorage) GetLogin(ctx context.Context, username, password string) (*domain.Login, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
 	for _, user := range s.users {
-		if user.Name == name && user.Password == password {
+		if user.Username == username && user.Password == password {
 			return user, nil
 		}
 	}

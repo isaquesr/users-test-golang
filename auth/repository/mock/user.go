@@ -11,14 +11,14 @@ type UserStorageMock struct {
 	mock.Mock
 }
 
-func (s *UserStorageMock) CreateUser(ctx context.Context, user *domain.User) error {
+func (s *UserStorageMock) CreateLogin(ctx context.Context, user *domain.Login) error {
 	args := s.Called(user)
 
 	return args.Error(0)
 }
 
-func (s *UserStorageMock) GetUser(ctx context.Context, name, password string) (*domain.User, error) {
-	args := s.Called(name, password)
+func (s *UserStorageMock) GetLogin(ctx context.Context, username, password string) (*domain.Login, error) {
+	args := s.Called(username, password)
 
-	return args.Get(0).(*domain.User), args.Error(1)
+	return args.Get(0).(*domain.Login), args.Error(1)
 }

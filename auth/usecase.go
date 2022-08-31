@@ -6,10 +6,10 @@ import (
 	"github.com/isaquesr/users-test-golang/domain"
 )
 
-const CtxUserKey = "user"
+const CtxUserKey = "login"
 
 type UseCase interface {
-	SignUp(ctx context.Context, u *domain.User) error
+	SignUp(ctx context.Context, username, password string) error
 	SignIn(ctx context.Context, username, password string) (string, error)
-	ParseToken(ctx context.Context, accessToken string) (*domain.User, error)
+	ParseToken(ctx context.Context, accessToken string) (*domain.Login, error)
 }

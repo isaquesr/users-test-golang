@@ -6,7 +6,7 @@ import (
 	"github.com/isaquesr/users-test-golang/domain"
 )
 
-type UserRepository interface {
-	CreateUser(ctx context.Context, user *domain.User) error
-	GetUser(ctx context.Context, name, password string) (*domain.User, error)
+type LoginRepository interface {
+	CreateLogin(ctx context.Context, login *domain.Login) error
+	GetLogin(ctx context.Context, username, password string) (*domain.Login, error)
 }

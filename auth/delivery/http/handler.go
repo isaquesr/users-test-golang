@@ -5,8 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/isaquesr/users-test-golang/auth"
-	"github.com/isaquesr/users-test-golang/domain"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Handler struct {
@@ -19,35 +17,20 @@ func NewHandler(useCase auth.UseCase) *Handler {
 	}
 }
 
-type SignInput struct {
-	ID       primitive.ObjectID `json:"id"`
-	Name     string             `json:"name"`
-	Password string             `json:"password"`
-	Address  string             `json:"address"`
-	Age      int32              `json:"age"`
-	Email    string             `json:"email"`
-}
-
-type SignIn struct {
-	Name     string `json:"name"`
+type signInput struct {
+	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 func (h *Handler) SignUp(c *gin.Context) {
-	user := &domain.User{
-		ID:       primitive.NewObjectID(),
-		Name:     "name",
-		Password: "password",
-		Email:    "email",
-		Age:      20,
-		Address:  "address",
-	}
-	if err := c.BindJSON(user); err != nil {
+	inp := new(signInput)
+
+	if err := c.BindJSON(inp); err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	if err := h.useCase.SignUp(c.Request.Context(), user); err != nil {
+	if err := h.useCase.SignUp(c.Request.Context(), inp.Username, inp.Password); err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -60,14 +43,14 @@ type signInResponse struct {
 }
 
 func (h *Handler) SignIn(c *gin.Context) {
-	in := new(SignIn)
+	inp := new(signInput)
 
-	if err := c.BindJSON(in); err != nil {
+	if err := c.BindJSON(inp); err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	token, err := h.useCase.SignIn(c.Request.Context(), in.Name, in.Password)
+	token, err := h.useCase.SignIn(c.Request.Context(), inp.Username, inp.Password)
 	if err != nil {
 		if err == auth.ErrUserNotFound {
 			c.AbortWithStatus(http.StatusUnauthorized)

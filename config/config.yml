@@ -1,4 +1,4 @@
-port: 8000
+port: 8080
 
 auth:
   hash_salt: "hash_salt"
@@ -9,3 +9,4 @@ mongo:
   uri: "mongodb://mongodb:27017"
   name: "testdb"
   user_collection: "users"
+  login_collection: "logins"

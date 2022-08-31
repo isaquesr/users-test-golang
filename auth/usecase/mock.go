@@ -11,8 +11,8 @@ type AuthUseCaseMock struct {
 	mock.Mock
 }
 
-func (m *AuthUseCaseMock) SignUp(ctx context.Context, u *domain.User) error {
-	args := m.Called(u)
+func (m *AuthUseCaseMock) SignUp(ctx context.Context, username, password string) error {
+	args := m.Called(username, password)
 
 	return args.Error(0)
 }
@@ -23,8 +23,8 @@ func (m *AuthUseCaseMock) SignIn(ctx context.Context, username, password string)
 	return args.Get(0).(string), args.Error(1)
 }
 
-func (m *AuthUseCaseMock) ParseToken(ctx context.Context, accessToken string) (*domain.User, error) {
+func (m *AuthUseCaseMock) ParseToken(ctx context.Context, accessToken string) (*domain.Login, error) {
 	args := m.Called(accessToken)
 
-	return args.Get(0).(*domain.User), args.Error(1)
+	return args.Get(0).(*domain.Login), args.Error(1)
 }
